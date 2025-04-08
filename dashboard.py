@@ -8,17 +8,13 @@ st.title("📊 GPSC Progress Tracker")
 uploaded_file = st.file_uploader("📂 Upload your Excel file (optional)", type=["xlsx"])
 if uploaded_file:
     xls = pd.ExcelFile(uploaded_file)
-    st.success("Custom file uploaded and loaded ✅")
+    st.success("✅ Custom file uploaded!")
 else:
     xls = pd.ExcelFile("GPSC_Exam_Tracker_Final.xlsx")
-    st.info("Using default file from repo")
+    st.info("ℹ️ Using default file from repo")
 
-@st.cache_data
-def load_data(xls_file):
-    sheets = {sheet: xls_file.parse(sheet) for sheet in xls_file.sheet_names}
-    return sheets
-
-data = load_data(xls)
+# --- Load all sheets ---
+data = {sheet: xls.parse(sheet) for sheet in xls.sheet_names}
 
 # --- Sidebar ---
 st.sidebar.title("📘 Select View")
@@ -28,7 +24,7 @@ df = data[sheet_name].copy()
 # --- Progress Calculation ---
 check_columns = ["Reading Done", "Notes Prepared", "PYQ Done", "Revision Done"]
 for col in check_columns:
-    df[col] = df[col].str.lower().map({"yes": 1, "no": 0})
+    df[col] = df[col].astype(str).str.lower().map({"yes": 1, "no": 0})
 df["Progress (%)"] = df[check_columns].mean(axis=1) * 100
 
 # --- Dashboard UI ---
